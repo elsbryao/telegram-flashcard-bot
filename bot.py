@@ -39,7 +39,7 @@ async def rus_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text("Обрабатываю русские фразы...")
     generate_flashcards_from_rus_phrases(phrases, OPENAI_API_KEY, ELEVENLABS_API_KEY, VOICE_ID)
-    await update.message.reply_document(InputFile(output_zip))
+    await update.message.reply_document(InputFile(output_zip, filename="flashcards.zip"))
 
 def main():
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
