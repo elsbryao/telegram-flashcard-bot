@@ -21,7 +21,8 @@ async def word_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     word = context.args[0]
     await update.message.reply_text(f"Генерирую карточки для слова: {word}...")
     generate_flashcards_from_word(word, OPENAI_API_KEY, ELEVENLABS_API_KEY, VOICE_ID)
-    await update.message.reply_document(InputFile(output_zip))
+    with open(output_zip, 'rb') as f:
+        await update.message.reply_document(document=f, filename="flashcards.zip")
 
 async def eng_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phrases = update.message.text.replace("/eng", "").strip().split("\n")
@@ -30,7 +31,9 @@ async def eng_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text("Обрабатываю английские фразы...")
     generate_flashcards_from_eng_phrases(phrases, OPENAI_API_KEY, ELEVENLABS_API_KEY, VOICE_ID)
-    await update.message.reply_document(InputFile(output_zip))
+    with open(output_zip, 'rb') as f:
+        await update.message.reply_document(document=f, filename="flashcards.zip")
+
 
 async def rus_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phrases = update.message.text.replace("/rus", "").strip().split("\n")
@@ -39,7 +42,9 @@ async def rus_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text("Обрабатываю русские фразы...")
     generate_flashcards_from_rus_phrases(phrases, OPENAI_API_KEY, ELEVENLABS_API_KEY, VOICE_ID)
-    await update.message.reply_document(InputFile(output_zip, filename="flashcards.zip"))
+    with open(output_zip, 'rb') as f:
+        await update.message.reply_document(document=f, filename="flashcards.zip")
+
 
 def main():
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
