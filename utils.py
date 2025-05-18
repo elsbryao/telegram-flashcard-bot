@@ -66,7 +66,20 @@ def generate_flashcards_from_word(word, openai_key, eleven_key, voice_id):
 def generate_flashcards_from_eng_phrases(phrases, openai_key, eleven_key, voice_id):
     init_output()
     joined = "\n".join(phrases)
-    prompt = f"""Вот список английских фраз:\n{joined}\nСделай перевод каждой фразы на разговорный русский. Верни Python-список пар."""
+    prompt = f"""
+Вот список английских фраз:
+{joined}
+
+Для каждой фразы сделай хороший разговорный перевод на русский.
+
+Верни строго Python-список пар в формате:
+[
+  ["русский перевод", "английская фраза"],
+  ...
+]
+
+Никаких пояснений, только список!
+"""
     flashcards = extract_flashcards(prompt, openai_key)
     save_and_zip(flashcards, eleven_key, voice_id)
 
