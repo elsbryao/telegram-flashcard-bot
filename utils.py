@@ -2,7 +2,6 @@ import csv
 import os
 import openai
 import requests
-from pydub import AudioSegment
 from tempfile import NamedTemporaryFile
 import shutil
 import zipfile
