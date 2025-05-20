@@ -81,14 +81,39 @@ async def rus_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def phrasal_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text("Пожалуйста, укажи фразовый глагол после команды /phrasal\nПример: /phrasal get over")
+        await update.message.reply_text(
+            "Пожалуйста, укажи фразовый глагол после команды /phrasal\nПример: /phrasal get over"
+        )
         return
+
     phrasal_verb = " ".join(context.args)
     await update.message.reply_text(f"Генерирую карточки с фразовым глаголом: {phrasal_verb}...")
-    voice_id = user_voice_map.get(update.effective_user.id, list(VOICES.values())[0])
-    generate_flashcards_from_phrasal(phrasal_verb, OPENAI_API_KEY, ELEVENLABS_API_KEY, voice_id)
-    with open(output_zip, 'rb') as f:
-        await update.message.reply_document(document=f, filename="flashcards.zip")
+
+    try:
+        voice_id = user_voice_map.get(update.effective_user.id, list(VOICES.values())[0])
+
+        # Запускаем функцию генерации карточек в фоновом потоке
+        zip_path = await context.application.run_in_executor(
+            None,
+            generate_flashcards_from_phrasal,
+            phrasal_verb,
+            OPENAI_API_KEY,
+            ELEVENLABS_API_KEY,
+            voice_id
+        )
+
+        # Проверка: существует ли файл
+        if not os.path.exists(zip_path):
+            await update.message.reply_text("Не удалось найти файл с карточками. Что-то пошло не так.")
+            return
+
+        # Отправка файла
+        with open(zip_path, 'rb') as f:
+            await update.message.reply_document(document=f, filename="flashcards.zip")
+
+    except Exception as e:
+        await update.message.reply_text(f"Произошла ошибка при генерации карточек: {e}")
+
 
 def main():
     app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
