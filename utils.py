@@ -2,7 +2,6 @@ import csv
 import os
 import openai
 import requests
-from gtts import gTTS  # или любой другой синтез
 from pydub import AudioSegment
 from tempfile import NamedTemporaryFile
 import shutil
