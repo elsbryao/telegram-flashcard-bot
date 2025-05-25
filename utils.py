@@ -2,6 +2,8 @@ import os
 import csv
 import requests
 import zipfile
+import json
+import ast
 from openai import OpenAI
 
 output_dir = "output"
@@ -51,7 +53,22 @@ def extract_flashcards(prompt, api_key):
         messages=[{"role": "user", "content": prompt}],
         temperature=0.4
     )
-    return eval(response.choices[0].message.content)
+
+    raw = response.choices[0].message.content.strip()
+
+    # Убираем markdown-обёртку, если есть
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        lines = raw.splitlines()
+        if lines[0].strip().startswith("python"):
+            lines = lines[1:]
+        raw = "\n".join(lines)
+
+    try:
+        return ast.literal_eval(raw)
+    except Exception as e:
+        print("❌ Ошибка при парсинге flashcards:", e)
+        raise
 
 def generate_flashcards_from_word(word, openai_key, eleven_key, voice_id):
     init_output()
@@ -89,3 +106,4 @@ def generate_flashcards_from_rus_phrases(phrases, openai_key, eleven_key, voice_
     prompt = f"""Вот список русских фраз:\n{joined}\nСделай точный разговорный перевод на английский. Верни Python-список пар."""
     flashcards = extract_flashcards(prompt, openai_key)
     save_and_zip(flashcards, eleven_key, voice_id)
+
